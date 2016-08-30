@@ -1,0 +1,17 @@
+name: sosreport
+summary: Set of tools to gather troubleshooting data from a system
+maintainer: Louis Bouchard <louis.bouchard@ubuntu.com>
+description: |
+  Sos is a set of tools that gathers information about system hardware and
+  configuration. The information can then be used for diagnostic
+  purposes and debugging. Sos is commonly used to help support
+  technicians and developers.
+tags:
+  # Replace "misc" with one or more whitelisted tags from this list:
+  # https://jujucharms.com/docs/stable/authors-charm-metadata
+  - misc
+subordinate: true
+requires:
+  juju-info:
+    interface: juju-info
+    scope: container
