@@ -1,8 +1,8 @@
 options:
-  string-option:
+  repository:
     type: string
-    default: "Default Value"
-    description: "A short description of the configuration option"
+    default: "apt"
+    description: "The repository to use to install sosreport"
   boolean-option:
     type: boolean
     default: False

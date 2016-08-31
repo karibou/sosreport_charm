@@ -5,6 +5,7 @@ from charmhelpers.core.hookenv import config
 from charmhelpers.fetch import apt_install
 from charmhelpers.fetch import apt_update
 from charmhelpers.fetch import apt_purge
+from charmhelpers.fetch import add_source
 from charms.reactive import when_not, set_state, hook
 from charms import layer
 
@@ -26,6 +27,11 @@ def install_sosreport():
     #  * https://github.com/juju-solutions/layer-basic#overview
     #
     status_set('maintenance', 'Installing sosreport')
+    cfg = config()
+    repo = config('repository')
+    if repo != 'apt':
+        add_source(repo)
+
     apt_update()
     apt_install(packages)
 
