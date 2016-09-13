@@ -2,6 +2,7 @@
 
 from charmhelpers.core.hookenv import action_get
 from charmhelpers.core.hookenv import action_set
+from charmhelpers.core.hookenv import action_fail
 from charmhelpers.core.hookenv import DEBUG
 from charmhelpers.core.hookenv import log as juju_log
 from charmhelpers.core.hookenv import config
@@ -15,7 +16,15 @@ command = ['sosreport']
 default_option = ['--batch']
 juju_home = '/home/ubuntu'
 params = action_get()
-valid_options = ['options']
+valid_options = ['options', 'homedir']
+
+if 'homedir' in params.keys():
+    if not os.path.isdir(params['homedir']):
+        action_set({'outcome': 'failure'})
+        action_msg = 'homedir: Invalid path - %s' % params['homedir']
+        action_fail(action_msg)
+        sys.exit(0)
+    juju_home = params['homedir']
 
 try:
     juju_log("Running %s %s" % (command, default_option), level=DEBUG)
