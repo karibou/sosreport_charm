@@ -4,5 +4,8 @@ collect:
      options:
        type: string
        description: Command line options to be passed to sosreport
+     home_dir:
+       type: string
+       description: Home directory where sosreport files will be copied to
 cleanup:
    description: Cleanup collected data to free up space
