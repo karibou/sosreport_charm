@@ -10,8 +10,4 @@ tags:
   # Replace "misc" with one or more whitelisted tags from this list:
   # https://jujucharms.com/docs/stable/authors-charm-metadata
   - misc
-subordinate: true
-requires:
-  juju-info:
-    interface: juju-info
-    scope: container
+subordinate: false
