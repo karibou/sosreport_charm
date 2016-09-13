@@ -1,0 +1,8 @@
+collect:
+   description: Collect sosreport data
+   params:
+     options:
+       type: string
+       description: Command line options to be passed to sosreport
+cleanup:
+   description: Cleanup collected data to free up space
