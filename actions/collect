@@ -42,5 +42,8 @@ try:
     action_set({'result-map.message': action_msg})
     action_set({'outcome': 'success'})
     sys.exit(0)
-except CalledProcessError:
-    pass
+except Exception as Err:
+    action_set({'outcome': 'failure'})
+    action_msg = 'Unable to run sosreport'
+    action_fail(action_msg)
+    sys.exit(0)
