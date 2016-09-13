@@ -5,12 +5,11 @@ from charmhelpers.core.hookenv import action_set
 from charmhelpers.core.hookenv import action_fail
 from charmhelpers.core.hookenv import DEBUG
 from charmhelpers.core.hookenv import log as juju_log
-from charmhelpers.core.hookenv import config
 import sys
 import os
 import re
 import shutil
-from subprocess import check_output, CalledProcessError
+from subprocess import check_output
 
 command = ['sosreport']
 default_option = ['--batch']
