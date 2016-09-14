@@ -37,7 +37,6 @@ command = ['sosreport']
 default_option = ['--batch']
 juju_home = '/home/ubuntu'
 params = action_get()
-valid_options = ['options', 'homedir', 'minfree', 'mingig']
 minfree = None
 mingig = None
 
