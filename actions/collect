@@ -2,20 +2,68 @@
 
 from charmhelpers.core.hookenv import action_get
 from charmhelpers.core.hookenv import action_set
+from charmhelpers.core.hookenv import action_fail
 from charmhelpers.core.hookenv import DEBUG
 from charmhelpers.core.hookenv import log as juju_log
-from charmhelpers.core.hookenv import config
 import sys
 import os
 import re
 import shutil
-from subprocess import check_output, CalledProcessError
+from subprocess import check_output
+
+
+def has_enough_space(mydir, minfree, mingig):
+    '''
+    Verify if filesystem has more than minfree% of free space
+    available and that it represent more than mingig Gb
+    '''
+    # Set default values
+    gigabyte = 1073741824
+    if not minfree:
+        minfree = 5
+    if not mingig:
+        mingig = 1
+
+    dirstat = os.statvfs(mydir)
+    pctfree = int(dirstat.f_bavail / dirstat.f_blocks * 100)
+    if pctfree < minfree:
+        spc_avail = int(dirstat.f_bavail * dirstat.f_bsize / gigabyte)
+        if spc_avail < mingig:
+            return False
+    return True
+
 
 command = ['sosreport']
 default_option = ['--batch']
 juju_home = '/home/ubuntu'
 params = action_get()
-valid_options = ['options']
+minfree = None
+mingig = None
+
+if params:
+    if 'minfree' in params.keys():
+        minfree = params['minfree']
+    else:
+        minfree = None
+    if 'mingig' in params.keys():
+        mingig = params['mingig']
+    else:
+        mingig = None
+
+    if 'homedir' in params.keys():
+        if not os.path.isdir(params['homedir']):
+            action_set({'outcome': 'failure'})
+            action_msg = 'homedir: Invalid path - %s' % params['homedir']
+            action_fail(action_msg)
+            sys.exit(0)
+        juju_home = params['homedir']
+
+if not has_enough_space(juju_home, minfree, mingig):
+    action_set({'outcome': 'failure'})
+    action_msg = 'Not enough space in %s (minfree: %d mingig: %d)' % (
+                 juju_home, minfree, mingig)
+    action_fail(action_msg)
+    sys.exit(0)
 
 try:
     juju_log("Running %s %s" % (command, default_option), level=DEBUG)
@@ -33,5 +81,8 @@ try:
     action_set({'result-map.message': action_msg})
     action_set({'outcome': 'success'})
     sys.exit(0)
-except CalledProcessError:
-    pass
+except Exception as Err:
+    action_set({'outcome': 'failure'})
+    action_msg = 'Unable to run sosreport'
+    action_fail(action_msg)
+    sys.exit(0)
