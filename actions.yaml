@@ -15,3 +15,7 @@ collect:
        description: Minimum number of Gb of free diskspace to run sosreport
 cleanup:
    description: Cleanup collected data to free up space
+   params:
+     homedir:
+       type: string
+       description: Home directory where sosreport files will be deleted from
