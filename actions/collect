@@ -11,19 +11,60 @@ import re
 import shutil
 from subprocess import check_output
 
+
+def has_enough_space(mydir, minfree, mingig):
+    '''
+    Verify if filesystem has more than minfree% of free space
+    available and that it represent more than mingig Gb
+    '''
+    # Set default values
+    gigabyte = 1073741824
+    if not minfree:
+        minfree = 5
+    if not mingig:
+        mingig = 1
+
+    dirstat = os.statvfs(mydir)
+    pctfree = int(dirstat.f_bavail / dirstat.f_blocks * 100)
+    if pctfree < minfree:
+        spc_avail = int(dirstat.f_bavail * dirstat.f_bsize / gigabyte)
+        if spc_avail < mingig:
+            return False
+    return True
+
+
 command = ['sosreport']
 default_option = ['--batch']
 juju_home = '/home/ubuntu'
 params = action_get()
-valid_options = ['options', 'homedir']
+valid_options = ['options', 'homedir', 'minfree', 'mingig']
+minfree = None
+mingig = None
 
-if 'homedir' in params.keys():
-    if not os.path.isdir(params['homedir']):
-        action_set({'outcome': 'failure'})
-        action_msg = 'homedir: Invalid path - %s' % params['homedir']
-        action_fail(action_msg)
-        sys.exit(0)
-    juju_home = params['homedir']
+if params:
+    if 'minfree' in params.keys():
+        minfree = params['minfree']
+    else:
+        minfree = None
+    if 'mingig' in params.keys():
+        mingig = params['mingig']
+    else:
+        mingig = None
+
+    if 'homedir' in params.keys():
+        if not os.path.isdir(params['homedir']):
+            action_set({'outcome': 'failure'})
+            action_msg = 'homedir: Invalid path - %s' % params['homedir']
+            action_fail(action_msg)
+            sys.exit(0)
+        juju_home = params['homedir']
+
+if not has_enough_space(juju_home, minfree, mingig):
+    action_set({'outcome': 'failure'})
+    action_msg = 'Not enough space in %s (minfree: %d mingig: %d)' % (
+                 juju_home, minfree, mingig)
+    action_fail(action_msg)
+    sys.exit(0)
 
 try:
     juju_log("Running %s %s" % (command, default_option), level=DEBUG)
