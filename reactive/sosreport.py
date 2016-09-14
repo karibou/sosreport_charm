@@ -7,7 +7,6 @@ from charmhelpers.fetch import apt_update
 from charmhelpers.fetch import apt_purge
 from charmhelpers.fetch import add_source
 from charms.reactive import when_not, set_state, hook
-from charms import layer
 
 packages = ['sosreport']
 
