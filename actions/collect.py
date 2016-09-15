@@ -33,56 +33,67 @@ def has_enough_space(mydir, minfree, mingig):
     return True
 
 
-command = ['sosreport']
-default_option = ['--batch']
-juju_home = '/home/ubuntu'
-params = action_get()
-minfree = None
-mingig = None
+def collect_sosreport():
 
-if params:
-    if 'minfree' in params.keys():
-        minfree = params['minfree']
-    else:
-        minfree = None
-    if 'mingig' in params.keys():
-        mingig = params['mingig']
-    else:
-        mingig = None
+    command = ['sosreport']
+    default_option = ['--batch']
+    juju_home = '/home/ubuntu'
+    minfree = None
+    mingig = None
 
-    if 'homedir' in params.keys():
-        if not os.path.isdir(params['homedir']):
-            action_set({'outcome': 'failure'})
-            action_msg = 'homedir: Invalid path - %s' % params['homedir']
-            action_fail(action_msg)
-            sys.exit(0)
-        juju_home = params['homedir']
+    params = action_get()
 
-if not has_enough_space(juju_home, minfree, mingig):
-    action_set({'outcome': 'failure'})
-    action_msg = 'Not enough space in %s (minfree: %d mingig: %d)' % (
-                 juju_home, minfree, mingig)
-    action_fail(action_msg)
-    sys.exit(0)
+    if params:
+        if 'minfree' in params.keys():
+            minfree = params['minfree']
+        else:
+            minfree = None
+        if 'mingig' in params.keys():
+            mingig = params['mingig']
+        else:
+            mingig = None
 
-try:
-    juju_log("Running %s %s" % (command, default_option), level=DEBUG)
-    sosrun = check_output(command + default_option, universal_newlines=True)
-    regex = re.compile(r' /tmp.*tar.*')
-    tarball = regex.findall(sosrun)[0].lstrip(' ')
-    md5sum = tarball + '.md5'
-    juju_log("Moving %s in %s" % (tarball, juju_home), level=DEBUG)
-    shutil.move(tarball, juju_home)
-    juju_log("Moving %s in %s" % (md5sum, juju_home), level=DEBUG)
-    shutil.move(md5sum, juju_home)
-    action_msg = '%s and %s available in %s' % (tarball.lstrip('/tmp/'),
-                                                md5sum.lstrip('/tmp/'),
-                                                juju_home)
-    action_set({'result-map.message': action_msg})
-    action_set({'outcome': 'success'})
-    sys.exit(0)
-except Exception as Err:
-    action_set({'outcome': 'failure'})
-    action_msg = 'Unable to run sosreport'
-    action_fail(action_msg)
-    sys.exit(0)
+        if 'homedir' in params.keys():
+            if not os.path.isdir(params['homedir']):
+                action_set({'outcome': 'failure'})
+                action_msg = 'homedir: Invalid path - %s' % params['homedir']
+                action_fail(action_msg)
+                sys.exit(0)
+            juju_home = params['homedir']
+
+    if not has_enough_space(juju_home, minfree, mingig):
+        action_set({'outcome': 'failure'})
+        action_msg = 'Not enough space in %s (minfree: %d mingig: %d)' % (
+                     juju_home, minfree, mingig)
+        action_fail(action_msg)
+        sys.exit(0)
+
+    try:
+        juju_log("Running %s %s" % (command, default_option), level=DEBUG)
+        sosrun = check_output(command + default_option,
+                              universal_newlines=True)
+        regex = re.compile(r' /tmp.*tar.*')
+        tarball = regex.findall(sosrun)[0].lstrip(' ')
+        md5sum = tarball + '.md5'
+        juju_log("Moving %s in %s" % (tarball, juju_home), level=DEBUG)
+        shutil.move(tarball, juju_home)
+        juju_log("Moving %s in %s" % (md5sum, juju_home), level=DEBUG)
+        shutil.move(md5sum, juju_home)
+        action_msg = '%s and %s available in %s' % (tarball.lstrip('/tmp/'),
+                                                    md5sum.lstrip('/tmp/'),
+                                                    juju_home)
+        action_set({'result-map.message': action_msg})
+        action_set({'outcome': 'success'})
+        sys.exit(0)
+    except Exception as Err:
+        action_set({'outcome': 'failure'})
+        action_msg = 'Unable to run sosreport'
+        action_fail(action_msg)
+        sys.exit(0)
+
+
+def main():
+    collect_sosreport()
+
+if __name__ == '__main__':
+    main()
