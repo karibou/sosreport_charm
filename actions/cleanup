@@ -25,7 +25,7 @@ try:
     for (path, name, files) in os.walk(juju_home):
         for sosfile in files:
             if (os.path.exists(path + "/" + sosfile)
-                and sosfiles.startswith('sosreport-')):
+                and sosfile.startswith('sosreport-')):
                 os.unlink(path + "/" + sosfile)
     action_msg = 'Directory %s cleaned up' % juju_home
     action_set({'result-map.message': action_msg})
