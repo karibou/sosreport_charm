@@ -23,8 +23,7 @@ class TestSosreportActions(unittest.TestCase):
 
     def test_collect_with_defaults(self):
         self.patch(collect.shutil, 'move')
-        self.patch(collect, 'has_enough_space', return_value = True)
-        self.patch(collect.sys, 'exit')
+        self.patch(collect, 'has_enough_space', return_value=True)
         sosrun = '''
         line-1
         line-2
@@ -32,7 +31,7 @@ class TestSosreportActions(unittest.TestCase):
          /tmp/sosreport-me.tar.xz
         last line
         '''
-        self.patch(collect, 'check_output', return_value = sosrun)
+        self.patch(collect, 'check_output', return_value=sosrun)
 
         collect.collect_sosreport()
         self.assertEqual(self.move.call_count, 2)
