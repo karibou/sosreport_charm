@@ -39,9 +39,9 @@ class TestSosreportActions(unittest.TestCase):
             if move_arg[0] == '':
                 pass
             self.assertEqual(move_arg[0][0].rstrip('.md5'),
-                             '/tmp/sosreport-me.tar.xz')
+                             '/tmp/sosreport-me.tar.xz',
+                             'Invalid file moved')
 
         default_sos_call = (['sosreport', '--batch'],)
         self.assertTupleEqual(self.check_output.call_args_list[0][0],
-                             default_sos_call)
-        self.exit.assert_called_once_with(0)
+                              default_sos_call, 'Invalid default options')
