@@ -19,10 +19,6 @@ def has_enough_space(mydir, minfree, mingig):
     '''
     # Set default values
     gigabyte = 1073741824
-    if not minfree:
-        minfree = 5
-    if not mingig:
-        mingig = 1
 
     dirstat = os.statvfs(mydir)
     pctfree = int(dirstat.f_bavail / dirstat.f_blocks * 100)
@@ -38,20 +34,17 @@ def collect_sosreport():
     command = ['sosreport']
     default_option = ['--batch']
     juju_home = '/home/ubuntu'
-    minfree = None
-    mingig = None
+    minfree = 5
+    mingig = 1
 
     params = action_get()
 
     if params:
         if 'minfree' in params.keys():
             minfree = params['minfree']
-        else:
-            minfree = None
+
         if 'mingig' in params.keys():
             mingig = params['mingig']
-        else:
-            mingig = None
 
         if 'homedir' in params.keys():
             if not os.path.isdir(params['homedir']):
