@@ -51,7 +51,7 @@ def collect_sosreport():
                 action_set({'outcome': 'failure'})
                 action_msg = 'homedir: Invalid path - %s' % params['homedir']
                 action_fail(action_msg)
-                sys.exit(0)
+                return
             juju_home = params['homedir']
 
     if not has_enough_space(juju_home, minfree, mingig):
@@ -59,7 +59,7 @@ def collect_sosreport():
         action_msg = 'Not enough space in %s (minfree: %d mingig: %d)' % (
                      juju_home, minfree, mingig)
         action_fail(action_msg)
-        sys.exit(0)
+        return
 
     try:
         juju_log("Running %s %s" % (command, default_option), level=DEBUG)
@@ -77,12 +77,12 @@ def collect_sosreport():
                                                     juju_home)
         action_set({'result-map.message': action_msg})
         action_set({'outcome': 'success'})
-        sys.exit(0)
+        return
     except Exception as Err:
         action_set({'outcome': 'failure'})
         action_msg = 'Unable to run sosreport'
         action_fail(action_msg)
-        sys.exit(0)
+        return
 
 
 def main():

@@ -20,7 +20,7 @@ def do_cleanup():
                 action_set({'outcome': 'failure'})
                 action_msg = 'homedir: Invalid path - %s' % params['homedir']
                 action_fail(action_msg)
-                sys.exit(0)
+                return
             juju_home = params['homedir']
 
     try:
@@ -33,12 +33,12 @@ def do_cleanup():
         action_msg = 'Directory %s cleaned up' % juju_home
         action_set({'result-map.message': action_msg})
         action_set({'outcome': 'success'})
-        sys.exit(0)
+        return
     except Exception as Err:
         action_set({'outcome': 'failure'})
         action_msg = 'Unable to cleanup %s' % juju_home
         action_fail(action_msg)
-        sys.exit(0)
+        return
 
 
 def main():
