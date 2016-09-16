@@ -6,6 +6,13 @@ import unittest
 
 import actions.collect as collect
 
+
+class fake_statvfs():
+    f_bavail = 0
+    f_blocks = 0
+    f_bsize = 0
+
+
 class TestSosreportActions(unittest.TestCase):
     def setUp(self):
         super(TestSosreportActions, self).setUp()
@@ -51,3 +58,34 @@ class TestSosreportActions(unittest.TestCase):
         collect.collect_sosreport()
         self.assertTrue(self.action_fail.call_args_list[0][0][0].startswith(
                         'Not enough space'))
+
+    def test_collect_with_wrong_dir(self):
+        self.patch(collect, 'action_get',
+                   return_value={'homedir': '/wrongdir'})
+        self.patch(collect, 'has_enough_space', return_value=True)
+        self.patch(collect.os.path, 'isdir', return_value=False)
+        self.patch(collect, 'action_fail')
+
+        collect.collect_sosreport()
+        self.action_fail.assert_called_with(
+            'homedir: Invalid path - /wrongdir')
+
+    def test_has_enough_space(self):
+        onegig = 1073741824
+        fake_dirstat = fake_statvfs()
+        fake_dirstat.f_bavail = 5 * onegig
+        fake_dirstat.f_blocks = 100 * onegig
+        fake_dirstat.f_bsize = 1
+
+        self.patch(collect.os, 'statvfs', return_value=fake_dirstat)
+
+        ret = collect.has_enough_space('/fake', 5, 1)
+        self.assertTrue(ret, '10 avail blocks should be higher than default')
+
+        fake_dirstat.f_bavail = 2 * onegig
+        ret = collect.has_enough_space('/fake', 5, 1)
+        self.assertTrue(ret, '2 gig should be more than mingig')
+
+        fake_dirstat.f_bavail = 0.5 * onegig
+        ret = collect.has_enough_space('/fake', 5, 1)
+        self.assertFalse(ret, '500M should be too small')
