@@ -45,3 +45,9 @@ class TestSosreportActions(unittest.TestCase):
         default_sos_call = (['sosreport', '--batch'],)
         self.assertTupleEqual(self.check_output.call_args_list[0][0],
                               default_sos_call, 'Invalid default options')
+
+        self.has_enough_space.return_value = False
+        self.patch(collect, 'action_fail')
+        collect.collect_sosreport()
+        self.assertTrue(self.action_fail.call_args_list[0][0][0].startswith(
+                        'Not enough space'))
