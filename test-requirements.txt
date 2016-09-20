@@ -1,0 +1,8 @@
+nose
+Jinja2
+mock
+PyYAML
+six
+coverage
+flake8
+charms.reactive
