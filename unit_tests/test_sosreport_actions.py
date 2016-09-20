@@ -1,10 +1,12 @@
 import mock
 import shutil
+import os
 import tempfile
 
 import unittest
 
 import actions.collect as collect
+import actions.cleanup as cleanup
 
 
 class fake_statvfs():
@@ -89,3 +91,38 @@ class TestSosreportActions(unittest.TestCase):
         fake_dirstat.f_bavail = 0.5 * onegig
         ret = collect.has_enough_space('/fake', 5, 1)
         self.assertFalse(ret, '500M should be too small')
+
+    def test_cleanup_with_defaults(self):
+        # Make use of homedir config variable to be able
+        # to mock the directory to be cleaned into tempdir
+        # and to provide the os.walk generator to the mock.
+        # mydir = self.tempdir + '/ubuntu'
+        mydir = self.tempdir
+        # os.mkdir(mydir)
+        with open(mydir + '/sosreport-me.tar.xz', 'w') as tarball:
+            tarball.write('a')
+        with open(mydir + '/sosreport-me.tar.xz.md5', 'w') as md5sum:
+            md5sum.write('a')
+        dir_content = os.walk(mydir)
+        self.patch(cleanup, 'action_get',
+                   return_value={'homedir': '%s' % mydir})
+        self.patch(cleanup.os, 'walk', return_value=dir_content)
+        self.patch(cleanup.os, 'unlink')
+        cleanup.do_cleanup()
+        self.assertEqual(self.unlink.call_count, 2)
+        for unlink_arg in self.unlink.call_args_list:
+            if unlink_arg[0] == '':
+                pass
+            self.assertEqual(unlink_arg[0][0].rstrip('.md5'),
+                             '%s/sosreport-me.tar.xz' % self.tempdir,
+                             'Invalid file deleted')
+
+    def test_cleanup_with_wrong_dir(self):
+        self.patch(cleanup, 'action_get',
+                   return_value={'homedir': '/wrongdir'})
+        self.patch(cleanup.os.path, 'isdir', return_value=False)
+        self.patch(cleanup, 'action_fail')
+
+        cleanup.do_cleanup()
+        self.action_fail.assert_called_with(
+            'homedir: Invalid path - /wrongdir')
