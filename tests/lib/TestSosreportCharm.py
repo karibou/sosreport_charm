@@ -1,5 +1,4 @@
 import amulet
-import requests
 import unittest
 
 
