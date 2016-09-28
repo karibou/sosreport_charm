@@ -1,0 +1,15 @@
+#!/usr/bin/python3
+
+import amulet
+import requests
+import unittest
+from lib.TestSosreportCharm import TestSosreportCharm
+
+
+if __name__ == '__main__':
+    # Skip the test for the time being
+    import sys
+    sys.exit(100)
+    # It fails on amulet script expecting py2
+    deployment_x = TestSosreportCharm(series='xenial')
+    deployment_x.run_test()
