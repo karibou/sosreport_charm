@@ -7,6 +7,8 @@ from charmhelpers.fetch import apt_update
 from charmhelpers.fetch import apt_purge
 from charmhelpers.fetch import add_source
 from charms.reactive import when_not, set_state, hook
+from charmhelpers.core.hookenv import log as juju_log
+from charmhelpers.core.hookenv import DEBUG
 
 packages = ['sosreport']
 
@@ -45,3 +47,15 @@ def cleanup():
     status_set('maintenance', 'Purging sosreport')
     apt_purge(packages)
     status_set('active', 'Sosreport purged')
+
+@hook('config-changed')
+def config_changed():
+    cfg = config()
+    repo = config('repository')
+    if repo != 'apt':
+        status_set('maintenance', 'Changing sosreport repository')
+        juju_log("Changing sosreport repository to : %s" % repo, level=DEBUG)
+        add_source(repo)
+        apt_update()
+        apt_install(packages)
+        status_set('active', 'Sosreport repository updated')
