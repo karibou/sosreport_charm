@@ -20,7 +20,7 @@ class TestSosreportHooks(unittest.TestCase):
         patch.object(sosreport, 'apt_install')
         sosreport.install_sosreport()
         sosreport.set_state.assert_called_with('sosreport.ready')
-        sosreport.apt_install.assert_called_once_with(['sosreport'])
+        sosreport.apt_install.assert_called_with(['sosreport'])
 
         patch.object(sosreport, 'add_source')
         sosreport.config.return_value = 'ppa:myppa'
@@ -33,6 +33,16 @@ class TestSosreportHooks(unittest.TestCase):
         sosreport.cleanup()
         sosreport.apt_purge.assert_called_once_with(['sosreport'])
         sosreport.status_set.assert_called_with('active', 'Sosreport purged')
+
+    def test_config_changed(self):
+        patch.object(sosreport, 'add_source')
+        patch.object(sosreport, 'apt_update')
+        patch.object(sosreport, 'apt_install')
+        sosreport.config.return_value = 'ppa:myppa'
+        sosreport.config_changed()
+        sosreport.add_source.assert_called_with('ppa:myppa')
+        self.assertTrue(sosreport.apt_update.called)
+        sosreport.apt_install.assert_called_with(['sosreport'])
 
     def _get_last_conf_line(self, config_file):
         with open(config_file, 'r') as conf_file:
