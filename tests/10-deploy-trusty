@@ -1,0 +1,8 @@
+#!/usr/bin/python3
+
+from lib.TestSosreportCharm import TestSosreportCharm
+
+
+if __name__ == '__main__':
+    deployment_t = TestSosreportCharm(series='trusty')
+    deployment_t.run_test()
