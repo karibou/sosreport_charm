@@ -3,11 +3,3 @@ options:
     type: string
     default: "apt"
     description: "The repository to use to install sosreport"
-  boolean-option:
-    type: boolean
-    default: False
-    description: "A short description of the configuration option"
-  int-option:
-    type: int
-    default: 9001
-    description: "A short description of the configuration option"
