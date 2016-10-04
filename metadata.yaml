@@ -7,7 +7,5 @@ description: |
   purposes and debugging. Sos is commonly used to help support
   technicians and developers.
 tags:
-  # Replace "misc" with one or more whitelisted tags from this list:
-  # https://jujucharms.com/docs/stable/authors-charm-metadata
   - misc
 subordinate: false
