@@ -92,6 +92,12 @@ class TestSosreportActions(unittest.TestCase):
         ret = collect.has_enough_space('/fake', 5, 1)
         self.assertFalse(ret, '500M should be too small')
 
+    def test_collect_raise_exception(self):
+        self.patch(collect, 'has_enough_space', return_value=True)
+        self.patch(collect, 'check_output')
+        self.check_output.side_effect = Exception
+        self.assertRaises(Exception, collect.collect_sosreport())
+
     def test_cleanup_with_defaults(self):
         # Make use of homedir config variable to be able
         # to mock the directory to be cleaned into tempdir
@@ -126,3 +132,10 @@ class TestSosreportActions(unittest.TestCase):
         cleanup.do_cleanup()
         self.action_fail.assert_called_with(
             'homedir: Invalid path - /wrongdir')
+
+    def test_cleanup_raise_exception(self):
+        self.patch(cleanup.os, 'walk', return_value=('', '', 'sosreport-1'))
+        self.patch(cleanup.os.path, 'exists', return_value=True)
+        self.patch(cleanup.os, 'unlink')
+        self.unlink.side_effect = Exception
+        self.assertRaises(Exception, cleanup.do_cleanup())
