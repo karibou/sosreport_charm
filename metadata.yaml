@@ -8,4 +8,7 @@ description: |
   technicians and developers.
 tags:
   - misc
+series:
+  - trusty
+  - xenial
 subordinate: false
