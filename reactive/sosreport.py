@@ -1,5 +1,3 @@
-import os
-from shlex import split
 from charmhelpers.core.hookenv import status_set
 from charmhelpers.core.hookenv import config
 from charmhelpers.fetch import apt_install
@@ -28,7 +26,6 @@ def install_sosreport():
     #  * https://github.com/juju-solutions/layer-basic#overview
     #
     status_set('maintenance', 'Installing sosreport')
-    cfg = config()
     repo = config('repository')
     if repo != 'apt':
         add_source(repo)
@@ -48,9 +45,9 @@ def cleanup():
     apt_purge(packages)
     status_set('active', 'Sosreport purged')
 
+
 @hook('config-changed')
 def config_changed():
-    cfg = config()
     repo = config('repository')
     if repo != 'apt':
         status_set('maintenance', 'Changing sosreport repository')
