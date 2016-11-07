@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from __future__ import division
 from charmhelpers.core.hookenv import action_get
 from charmhelpers.core.hookenv import action_set
 from charmhelpers.core.hookenv import action_fail
@@ -12,20 +13,44 @@ import shutil
 from subprocess import check_output
 
 
-def has_enough_space(mydir, minfree, mingig):
+def has_enough_space(mydir, minfree):
     '''
-    Verify if filesystem has more than minfree% of free space
-    available and that it represent more than mingig Gb
+    Verify if filesystem has more than minfree% or minfree[M|G] of free space
+    available. Valid suffixes are %, M or G
     '''
     # Set default values
+    megabyte = 1048576
     gigabyte = 1073741824
 
+    min_suffix = minfree[-1:]
+    if min_suffix not in ['%', 'M', 'G']:
+        action_msg = 'minfree: Invalid suffix : %s' % min_suffix
+        action_fail(action_msg)
+        return False
+
+    try:
+        min_spc = int(minfree[:-1])
+    except ValueError as Err:
+        action_msg = 'minfree: Invalid value : %s' % minfree[:-1]
+        action_fail(action_msg)
+        return False
+
     dirstat = os.statvfs(mydir)
-    pctfree = int(dirstat.f_bavail / dirstat.f_blocks * 100)
-    if pctfree < minfree:
-        spc_avail = int(dirstat.f_bavail * dirstat.f_bsize / gigabyte)
-        if spc_avail < mingig:
+
+    if min_suffix == '%':
+        pctfree = int(dirstat.f_bavail / dirstat.f_blocks * 100)
+        if min_spc < pctfree:
             return False
+    else:
+        if min_suffix == 'G':
+            multiplier = gigabyte
+        else:
+            multiplier = megabyte
+
+        spc_avail = int(dirstat.f_bavail * dirstat.f_bsize / multiplier)
+        if spc_avail < min_spc:
+            return False
+
     return True
 
 
@@ -34,17 +59,13 @@ def collect_sosreport():
     command = ['sosreport']
     default_option = ['--batch']
     juju_home = '/home/ubuntu'
-    minfree = 5
-    mingig = 1
+    minfree = '5%'
 
     params = action_get()
 
     if params:
         if 'minfree' in params.keys():
             minfree = params['minfree']
-
-        if 'mingig' in params.keys():
-            mingig = params['mingig']
 
         if 'homedir' in params.keys():
             if not os.path.isdir(params['homedir']):
@@ -54,10 +75,10 @@ def collect_sosreport():
                 return
             juju_home = params['homedir']
 
-    if not has_enough_space(juju_home, minfree, mingig):
+    if not has_enough_space(juju_home, minfree):
         action_set({'outcome': 'failure'})
-        action_msg = 'Not enough space in %s (minfree: %d mingig: %d)' % (
-                     juju_home, minfree, mingig)
+        action_msg = 'Not enough space in %s (minfree: %s )' % (
+                     juju_home, minfree)
         action_fail(action_msg)
         return
 

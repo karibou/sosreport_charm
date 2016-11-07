@@ -19,6 +19,12 @@ class TestSosreportActions(unittest.TestCase):
     def setUp(self):
         super(TestSosreportActions, self).setUp()
         self.tempdir = tempfile.mkdtemp()
+        self.onegig = 1073741824
+        self.onemeg = 1048576
+        self.fake_dirstat = fake_statvfs()
+        self.fake_dirstat.f_bavail = 5 * self.onegig
+        self.fake_dirstat.f_blocks = 100 * self.onegig
+        self.fake_dirstat.f_bsize = 1
 
     def tearDown(self):
         shutil.rmtree(self.tempdir, ignore_errors=True)
@@ -72,25 +78,56 @@ class TestSosreportActions(unittest.TestCase):
         self.action_fail.assert_called_with(
             'homedir: Invalid path - /wrongdir')
 
-    def test_has_enough_space(self):
-        onegig = 1073741824
-        fake_dirstat = fake_statvfs()
-        fake_dirstat.f_bavail = 5 * onegig
-        fake_dirstat.f_blocks = 100 * onegig
-        fake_dirstat.f_bsize = 1
+    def test_has_enough_space_default(self):
 
-        self.patch(collect.os, 'statvfs', return_value=fake_dirstat)
+        self.patch(collect.os, 'statvfs', return_value=self.fake_dirstat)
 
-        ret = collect.has_enough_space('/fake', 5, 1)
-        self.assertTrue(ret, '10 avail blocks should be higher than default')
+        ret = collect.has_enough_space('/fake', '5%')
+        self.assertTrue(ret, '5% should return enough space')
 
-        fake_dirstat.f_bavail = 2 * onegig
-        ret = collect.has_enough_space('/fake', 5, 1)
-        self.assertTrue(ret, '2 gig should be more than mingig')
+    def test_has_enough_space_2pct(self):
 
-        fake_dirstat.f_bavail = 0.5 * onegig
-        ret = collect.has_enough_space('/fake', 5, 1)
-        self.assertFalse(ret, '500M should be too small')
+        self.patch(collect.os, 'statvfs', return_value=self.fake_dirstat)
+
+        ret = collect.has_enough_space('/fake', '2%')
+        self.assertFalse(ret, '2% should not be enough')
+
+    def test_has_enough_space_5G(self):
+
+        self.patch(collect.os, 'statvfs', return_value=self.fake_dirstat)
+
+        ret = collect.has_enough_space('/fake', '5G')
+        self.assertTrue(ret, '5G should be enough')
+
+    def test_has_enough_space_6G(self):
+
+        self.patch(collect.os, 'statvfs', return_value=self.fake_dirstat)
+
+        ret = collect.has_enough_space('/fake', '6G')
+        self.assertFalse(ret, '6G should not be enough')
+
+    def test_has_enough_space_6M(self):
+
+        self.fake_dirstat.f_bavail = 5 * self.onemeg
+        self.patch(collect.os, 'statvfs', return_value=self.fake_dirstat)
+
+        ret = collect.has_enough_space('/fake', '6M')
+        self.assertFalse(ret, '6M should not be enough')
+
+    def test_has_enough_space_wrong_suffix(self):
+
+        self.patch(collect, 'action_fail')
+
+        ret = collect.has_enough_space('/fake', '6P')
+        self.assertFalse(ret, 'P should not be a valid suffix')
+        self.action_fail.assert_called_with('minfree: Invalid suffix : P')
+
+    def test_has_enough_space_wrong_value(self):
+
+        self.patch(collect, 'action_fail')
+
+        collect.has_enough_space('/fake', '6PM')
+        self.action_fail.assert_called_with('minfree: Invalid value : 6P')
 
     def test_collect_raise_exception(self):
         self.patch(collect, 'has_enough_space', return_value=True)

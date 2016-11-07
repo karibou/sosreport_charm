@@ -9,10 +9,9 @@ collect:
        description: Home directory where sosreport files will be copied to
      minfree:
        type: integer
-       description: Minimum percent of free diskspace to run sosreport
-     mingig:
-       type: integer
-       description: Minimum number of Gb of free diskspace to run sosreport
+       description: >
+         Minimum of free diskspace to run sosreport expressed in percent,
+         Megabytes or Gigabytes. Valid suffixes are %  M or G
 cleanup:
    description: Cleanup collected data to free up space
    params:
