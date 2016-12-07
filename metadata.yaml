@@ -1,11 +1,15 @@
 name: sosreport
-summary: Set of tools to gather troubleshooting data from a system
+summary: Charm to install and collect tool to troubleshooting data from a system
 maintainer: Louis Bouchard <louis.bouchard@ubuntu.com>
 description: |
   Sos is a set of tools that gathers information about system hardware and
-  configuration. The information can then be used for diagnostic
-  purposes and debugging. Sos is commonly used to help support
-  technicians and developers.
+  configuration. The information can then be used for diagnostic purposes and
+  debugging. Sos is commonly used to help support technicians and developers.
+  .
+  This charm will install sosreport on the designated unit. Two actions are
+  available :
+    collect - will run sosreport and create a tarball to be copied
+    cleanup - will delete tarballs previously created
 tags:
   - misc
 series:
