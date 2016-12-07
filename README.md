@@ -47,10 +47,9 @@ The collect action has the following optional parameters :
  * options : Valid options to be passed unchanged to sosreport
  * homedir : Alternate directory where reports will be stored. The directory
 	     must exist (default: /home/ubuntu)
- * minfree : Minimum free space available to allow for a report to be created
-	     (expressed in percent, default: 5)
- * mingig :  Minimum number of Gigabytes available to allow for a report to be
-	     created (expressed in Gb, default: 1)
+ * minfree : Minimum of free diskspace to run sosreport expressed in percent,
+	     Megabytes or Gigabytes. Valid suffixes are %  M or G
+	     (default 5%)
 
 The cleanup action has the following optional parameter :
  * homedir : Alternate directory where stored reports needs to be deleted. The
