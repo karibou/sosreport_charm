@@ -39,7 +39,7 @@ def has_enough_space(mydir, minfree):
 
     if min_suffix == '%':
         pctfree = int(dirstat.f_bavail / dirstat.f_blocks * 100)
-        if min_spc < pctfree:
+        if pctfree < min_spc:
             return False
     else:
         if min_suffix == 'G':

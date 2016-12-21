@@ -22,7 +22,7 @@ class TestSosreportActions(unittest.TestCase):
         self.onegig = 1073741824
         self.onemeg = 1048576
         self.fake_dirstat = fake_statvfs()
-        self.fake_dirstat.f_bavail = 5 * self.onegig
+        self.fake_dirstat.f_bavail = 7 * self.onegig
         self.fake_dirstat.f_blocks = 100 * self.onegig
         self.fake_dirstat.f_bsize = 1
 
@@ -85,12 +85,12 @@ class TestSosreportActions(unittest.TestCase):
         ret = collect.has_enough_space('/fake', '5%')
         self.assertTrue(ret, '5% should return enough space')
 
-    def test_has_enough_space_2pct(self):
+    def test_has_enough_space_10pct(self):
 
         self.patch(collect.os, 'statvfs', return_value=self.fake_dirstat)
 
-        ret = collect.has_enough_space('/fake', '2%')
-        self.assertFalse(ret, '2% should not be enough')
+        ret = collect.has_enough_space('/fake', '10%')
+        self.assertFalse(ret, '10% should not be enough')
 
     def test_has_enough_space_5G(self):
 
@@ -99,12 +99,12 @@ class TestSosreportActions(unittest.TestCase):
         ret = collect.has_enough_space('/fake', '5G')
         self.assertTrue(ret, '5G should be enough')
 
-    def test_has_enough_space_6G(self):
+    def test_has_enough_space_10G(self):
 
         self.patch(collect.os, 'statvfs', return_value=self.fake_dirstat)
 
-        ret = collect.has_enough_space('/fake', '6G')
-        self.assertFalse(ret, '6G should not be enough')
+        ret = collect.has_enough_space('/fake', '10G')
+        self.assertFalse(ret, '10G should not be enough')
 
     def test_has_enough_space_6M(self):
 
