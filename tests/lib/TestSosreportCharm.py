@@ -35,3 +35,21 @@ class TestSosreportCharm(unittest.TestCase):
         self.deployment.log.debug("Testing if the sosreport executable exists")
         self.assertEqual(self.file_stat['uid'], 0)
         self.assertEqual(self.file_stat['gid'], 0)
+        # Test collect action with only 1% minfree
+        self.actions = self.unit.action_defined().keys()
+        if 'collect' not in self.actions:
+            message = ('The collect action does not exist')
+            amulet.raise_status(amulet.SKIP, msg=message)
+        try:
+            self.action_id = self.unit.action_do('collect', {'minfree': "1%"})
+            self.out = self.deployment.get_action_output(self.action_id,
+                                                         timeout=self.seconds,
+                                                         full_output=True)
+            if self.out['status'] == 'failed':
+                message = ('collect action failed : %s' % self.out['message'])
+                amulet.raise_status(amulet.SKIP, msg=message)
+        except OSError as E:
+            message = ('Error in execution of the action : %s' % E)
+            amulet.raise_status(amulet.SKIP, msg=message)
+        except:
+            raise

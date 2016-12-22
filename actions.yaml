@@ -8,7 +8,7 @@ collect:
        type: string
        description: Home directory where sosreport files will be copied to
      minfree:
-       type: integer
+       type: string
        description: >
          Minimum of free diskspace to run sosreport expressed in percent,
          Megabytes or Gigabytes. Valid suffixes are %  M or G
