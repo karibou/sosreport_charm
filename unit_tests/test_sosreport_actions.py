@@ -176,3 +176,26 @@ class TestSosreportActions(unittest.TestCase):
         self.patch(cleanup.os, 'unlink')
         self.unlink.side_effect = Exception
         self.assertRaises(Exception, cleanup.do_cleanup())
+
+    def test_collect_with_one_option(self):
+        self.patch(collect, 'action_get',
+                   return_value={'options': '-a'})
+        self.patch(collect.shutil, 'move')
+        self.patch(collect, 'has_enough_space', return_value=True)
+
+        self.patch(collect, 'check_output')
+        collect.collect_sosreport()
+        self.check_output.assert_called_with(['sosreport', '--batch', '-a'],
+                                             universal_newlines=True)
+
+    def test_collect_with_multiple_options(self):
+        self.patch(collect, 'action_get',
+                   return_value={'options': '-o lxd -o networking'})
+        self.patch(collect.shutil, 'move')
+        self.patch(collect, 'has_enough_space', return_value=True)
+
+        self.patch(collect, 'check_output')
+        collect.collect_sosreport()
+        self.check_output.assert_called_with(['sosreport', '--batch', '-o',
+                                              'lxd', '-o', 'networking'],
+                                             universal_newlines=True)

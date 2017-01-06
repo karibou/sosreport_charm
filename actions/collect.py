@@ -75,6 +75,11 @@ def collect_sosreport():
                 return
             juju_home = params['homedir']
 
+        if 'options' in params.keys():
+            sos_options = default_option + params['options'].split()
+        else:
+            sos_options = default_option
+
     if not has_enough_space(juju_home, minfree):
         action_set({'outcome': 'failure'})
         action_msg = 'Not enough space in %s (minfree: %s )' % (
@@ -83,8 +88,8 @@ def collect_sosreport():
         return
 
     try:
-        juju_log("Running %s %s" % (command, default_option), level=DEBUG)
-        sosrun = check_output(command + default_option,
+        juju_log("Running %s %s" % (command, sos_options), level=DEBUG)
+        sosrun = check_output(command + sos_options,
                               universal_newlines=True)
         regex = re.compile(r' /tmp.*tar.*')
         tarball = regex.findall(sosrun)[0].lstrip(' ')
