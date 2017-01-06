@@ -6,7 +6,6 @@ from charmhelpers.core.hookenv import action_set
 from charmhelpers.core.hookenv import action_fail
 from charmhelpers.core.hookenv import DEBUG
 from charmhelpers.core.hookenv import log as juju_log
-import sys
 import os
 import re
 import shutil
@@ -86,7 +85,9 @@ def collect_sosreport():
         return
 
     try:
-        juju_log("Running %s %s" % (command, sos_options), level=DEBUG)
+        juju_log('Running %s %s (minfree: %s)' % (command[0],
+                                                  ' '.join(sos_options),
+                                                  minfree), level=DEBUG)
         sosrun = check_output(command + sos_options,
                               universal_newlines=True)
         regex = re.compile(r' /tmp.*tar.*')
@@ -96,21 +97,24 @@ def collect_sosreport():
         shutil.move(tarball, juju_home)
         juju_log("Moving %s in %s" % (md5sum, juju_home), level=DEBUG)
         shutil.move(md5sum, juju_home)
-        action_msg = '%s and %s available in %s' % (tarball.lstrip('/tmp/'),
-                                                    md5sum.lstrip('/tmp/'),
-                                                    juju_home)
+        action_msg = ('Command : %s %s\n'
+                      'Returned files in %s :\n - %s\n - %s\n'
+                      ) % (command[0], ' '.join(sos_options), juju_home,
+                           tarball.lstrip('/tmp/'), md5sum.lstrip('/tmp/'))
         action_set({'result-map.message': action_msg})
         action_set({'outcome': 'success'})
         return
     except Exception as Err:
         action_set({'outcome': 'failure'})
-        action_msg = 'Unable to run sosreport'
+        action_msg = 'Unable to run %s %s' % (command[0],
+                                              ' '.join(sos_options))
         action_fail(action_msg)
         return
 
 
 def main():
     collect_sosreport()
+
 
 if __name__ == '__main__':
     main()
