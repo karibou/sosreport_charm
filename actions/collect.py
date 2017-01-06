@@ -57,7 +57,7 @@ def has_enough_space(mydir, minfree):
 def collect_sosreport():
 
     command = ['sosreport']
-    default_option = ['--batch']
+    sos_options = ['--batch']
     juju_home = '/home/ubuntu'
     minfree = '5%'
 
@@ -76,9 +76,7 @@ def collect_sosreport():
             juju_home = params['homedir']
 
         if 'options' in params.keys():
-            sos_options = default_option + params['options'].split()
-        else:
-            sos_options = default_option
+            sos_options = sos_options + params['options'].split()
 
     if not has_enough_space(juju_home, minfree):
         action_set({'outcome': 'failure'})
